@@ -1,0 +1,966 @@
+<html>
+  <head>
+    <title>My Now Amazing Webpage</title>
+    <script src="jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/flickity/3.0.0/flickity.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+      integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+      integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+      crossorigin=""
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flickity/3.0.0/flickity.pkgd.min.js"></script>
+    <link
+      rel="stylesheet"
+      src="https://cdnjs.cloudflare.com/ajax/libs/flickity/3.0.0/flickity.css"
+      media="screen"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <style>
+      .leaflet-tile-pane {
+        filter: grayscale(100%) brightness(1.08) grayscale(100%);
+      }
+      .container {
+        position: absolute;
+        /* z-index: -1; */
+        width: 100%;
+        height: 100%;
+        margin: -10px;
+        transition: 2s;
+        overflow-y: hidden;
+      }
+      .bike {
+        position: relative;
+        top: 0px;
+        left: 0px;
+        width: 250px;
+        height: 250px;
+        border: 0;
+        padding: 50px;
+        margin: 20px;
+        z-index: 2;
+        transition: (height) 2s;
+        visibility: visible;
+        background-image: url(PlusTile.png);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-color: transparent;
+      }
+      #showinfo {
+        opacity: 0;
+        position: relative;
+        top: -45px;
+        left: -44px;
+        width: 240px;
+        height: 90px;
+      }
+      #slider {
+        transform: translate(0%, -100%);
+        transition: (height) 2s;
+        visibility: hidden;
+      }
+
+      #map {
+        height: 100%;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 0;
+        transition: 2s;
+      }
+      #sidebarbutton {
+        position: absolute;
+        top: 80px;
+        bottom: 0;
+        left: 20px;
+        width: 40px;
+        height: 40px;
+        border: 0;
+        z-index: 3;
+        visibility: visible;
+        transition: 1s;
+        background-image: url(Menu.png);
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-color: transparent;
+      }
+      .sidenav {
+        height: 100%; /* 100% Full-height */
+        width: 0; /* 0 width - change this with JavaScript */
+        position: fixed; /* Stay in place */
+        z-index: 5; /* Stay on top */
+        top: 0; /* Stay at the top */
+        left: 0;
+        background-color: white; /* Black*/
+        overflow-x: hidden; /* Disable horizontal scroll */
+        padding-top: 60px; /* Place content 60px from the top */
+        transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+      }
+
+      /* The navigation menu links */
+      .sidenav a {
+        padding: 8px 8px 8px 32px;
+        text-decoration: none;
+        font-size: 25px;
+        color: black;
+        display: block;
+        transition: 0.3s;
+      }
+
+      /* When you mouse over the navigation links, change their color */
+      .sidenav a:hover {
+        color: #f1f1f1;
+      }
+
+      /* Style page content - use this if you want to push the page content to the right when you open the side navigation */
+      #main {
+        transition: margin-left 0.5s;
+        padding: 20px;
+      }
+
+      /* On smaller screens, where height is less than 450px, change the style of the sidenav (less padding and a smaller font size) */
+      @media screen and (max-height: 450px) {
+        .sidenav {
+          padding-top: 15px;
+        }
+        .sidenav a {
+          font-size: 18px;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: sans-serif;
+      }
+
+      .boldtext {
+        font-family: "Roboto", sans-serif;
+        color: #194761;
+        font-weight: bold;
+      }
+
+      #findmybike {
+        position: relative;
+        font-weight: bold;
+        left: 60px;
+        top: 5px;
+        width: 150px;
+        font-size: 24px;
+        overflow-x: visible;
+      }
+      #mybikes {
+        position: relative;
+        left: 32px;
+        top: 422px;
+        width: 150px;
+        font-size: 21px;
+        overflow-x: visible;
+      }
+      .bikeBriefInfo {
+        font-family: "Roboto", sans-serif;
+        color: #194761;
+        font-weight: bold;
+        position: absolute;
+        font-size: 18px;
+        width: 150px;
+        overflow-x: visible;
+        z-index: 4;
+        top: 22px;
+        left: 115px;
+      }
+      .battInfo {
+        position: absolute;
+        font-size: 14px;
+        width: 150px;
+        overflow-x: visible;
+        z-index: 4;
+        top: 59px;
+        left: 145px;
+      }
+      .distInfo {
+        position: absolute;
+        font-size: 14px;
+        width: 150px;
+        overflow-x: visible;
+        z-index: 4;
+        top: 59px;
+        left: 196px;
+      }
+      #bikeSettings {
+        font-family: "Roboto", sans-serif;
+        color: #194761;
+        font-weight: bold;
+        position: absolute;
+        font-size: 18px;
+        width: 150px;
+        overflow-x: visible;
+        z-index: 4;
+        top: 525px;
+        left: 105px;
+        visibility: hidden;
+      }
+      #unlockOnline {
+        position: absolute;
+        width: 170px;
+        height: 48px;
+        top: 550px;
+        left: 120px;
+        visibility: hidden;
+      }
+      #unlockBluetooth {
+        position: absolute;
+        width: 170px;
+        height: 48px;
+        top: 605px;
+        left: 120px;
+        visibility: hidden;
+      }
+      #bluetoothIndicator {
+        position: absolute;
+        width: 5px;
+        height: 48px;
+        border: 0;
+        padding: 0;
+        top: 605px;
+        left: 105px;
+        background-color: rgb(64, 255, 47);
+        visibility: hidden;
+      }
+      #wifiIndicator {
+        position: absolute;
+        width: 5px;
+        height: 48px;
+        border: 0;
+        padding: 0;
+        top: 550px;
+        left: 105px;
+        background-color: rgb(64, 255, 47);
+        visibility: hidden;
+      }
+      #welcome {
+        font-family: "Roboto", sans-serif;
+        color: black;
+        font-weight: bold;
+        position: absolute;
+        font-size: 24px;
+        top: 25%;
+        left: 10%;
+        transition: 0s;
+      }
+      #settings {
+        font-family: "Roboto", sans-serif;
+        color: black;
+        font-weight: 300px;
+        position: absolute;
+        font-size: 16px;
+        top: 55%;
+        left: 10%;
+        transition: 0s;
+      }
+      #help {
+        font-family: "Roboto", sans-serif;
+        color: black;
+        font-weight: 300px;
+        position: absolute;
+        font-size: 16px;
+        top: 60%;
+        left: 10%;
+        transition: 0s;
+      }
+      #unpairall {
+        font-family: "Roboto", sans-serif;
+        color: black;
+        font-weight: 300px;
+        position: absolute;
+        height: 20px;
+        font-size: 16px;
+        top: 50%;
+        left: 10%;
+        transition: 0s;
+        overflow: hidden;
+      }
+      #pairphysicalkey {
+        font-family: "Roboto", sans-serif;
+        color: black;
+        font-weight: 300px;
+        position: absolute;
+        height: 20px;
+        font-size: 16px;
+        top: 40%;
+        left: 10%;
+        transition: 0s;
+        overflow: hidden;
+      }
+      #lockall {
+        font-family: "Roboto", sans-serif;
+        color: black;
+        font-weight: 300px;
+        position: absolute;
+        height: 20px;
+        font-size: 16px;
+        top: 45%;
+        left: 10%;
+        transition: 0s;
+        overflow: hidden;
+      }
+      #logoutbutton {
+        font-family: "Roboto", sans-serif;
+        color: black;
+        font-weight: 300px;
+        position: absolute;
+        font-size: 16px;
+        top: 70%;
+        left: 10%;
+        transition: 0s;
+      }
+      #linebreak1 {
+        font-family: "Roboto", sans-serif;
+        color: rgb(70, 70, 70);
+        font-weight: 300px;
+        position: absolute;
+        font-size: 20px;
+        top: 30%;
+        left: 5%;
+        transition: 0s;
+      }
+      #linebreak2 {
+        font-family: "Roboto", sans-serif;
+        color: rgb(70, 70, 70);
+        font-weight: 300px;
+        position: absolute;
+        font-size: 20px;
+        top: 65%;
+        left: 5%;
+        transition: 0s;
+      }
+      #findme {
+        position: absolute;
+        /* top: 130px; */
+        top: 10%;
+        left: 80%;
+        width: 60px;
+        height: 60px;
+        border-color: #194761;
+        background-image: url(GPS.png);
+        background-size: 80%;
+        background-repeat: no-repeat;
+        background-color: white;
+        border-radius: 50%;
+        background-position: center;
+      }
+      #block {
+        position: absolute;
+        top: 98%;
+        left: 60%;
+        height: 20px;
+        width: 180px;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="main_container">
+      <div id="map"></div>
+      <button id="block"></button>
+      <button id="findme" onclick="findme()"></button>
+      <button id="sidebarbutton" onclick="openNav()">
+        <div class="boldtext" id="findmybike">Find My Bike</div>
+        <div class="boldtext" id="mybikes">My Bikes</div>
+      </button>
+      <div id="mySidenav" class="sidenav">
+        <div id="welcome">Welcome!</div>
+        <div id="linebreak1">________________________</div>
+        <div id="pairphysicalkey" onclick='Unity.call("pairphysicalkey")'>
+          Pair Physical Keys
+        </div>
+        <div id="lockall" onclick='Unity.call("lockallbikes")'>
+          Lock All Bikes
+        </div>
+        <div id="unpairall" onclick='Unity.call("deleteallbikes")'>
+          Unpair All Bikes
+        </div>
+        <div id="settings">Settings</div>
+        <div id="help" onclick='Unity.call("debugmode")'>Help</div>
+        <div id="linebreak2">________________________</div>
+        <div id="logoutbutton" onclick="logOut()">Logout</div>
+      </div>
+      <div
+        class="carousel"
+        id="slider"
+        data-flickity='{"prevNextButtons": false, "pageDots": false, "draggable":true}'
+      >
+        <div class="carousel-cell">
+          <button class="add_bike bike"></button>
+        </div>
+      </div>
+      <div id="bikeSettings">Unlock Bike</div>
+      <button id="unlockOnline" onclick="onUnlock()">Online Unlock</button
+      ><button id="unlockBluetooth" onclick="bluetoothUnlock()">
+        Bluetooth Unlock</button
+      ><button id="wifiIndicator"></button
+      ><button id="bluetoothIndicator"></button>
+    </div>
+    <script>
+      var map = L.map("map", { zoomControl: false }).setView(
+        [1.34069, 103.96437],
+        17
+      );
+
+      var host = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+      var attribution =
+        '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+      L.tileLayer(host, {
+        maxZoom: 19,
+        minZoom: 2,
+        attribution: attribution,
+      }).addTo(map);
+      map.locate({ setView: true, maxZoom: 18 });
+      // map.on("locationfound", onLocationFound);
+      // map.on("locationerror", onLocationError);
+
+      // function onLocationFound(e) {
+      //   var lat = e.latlng[0];
+      //   var log = e.latlng[1];
+      //   updatePosition(lat, log);
+      //   alert("GPS Position Found");
+      // }
+
+      // function onLocationError(e) {
+      //   alert(e.message);
+      // }
+    </script>
+    <script>
+      var cellCount = 0;
+      var currentBike = "-1";
+      var sliderState = true;
+      var closeinfoState = "hidden";
+      var navState = "hidden";
+      var wifiActive = 1;
+      var bluetoothActive = 1;
+      var userPos = "NotFound";
+      var markerGroup = L.layerGroup().addTo(map);
+      var fullscreenMode = false;
+
+      function resetSliderPos() {
+        var div = document.getElementsByClassName("bike");
+        for (var i = 0; i < div.length; i++) {
+          div[i].style.height = "100px";
+        }
+      }
+      resetSliderPos();
+
+      $(document).ready(function () {
+        Unity.call("ready");
+      });
+
+      // check if Jquery exist
+      // window.onload = function () {
+      //   if (window.jQuery) {
+      //     // jQuery is loaded
+      //     alert("Yeah!");
+      //   } else {
+      //     // jQuery is not loaded
+      //     alert("Doesn't Work");
+      //   }
+      // };
+
+      function openNav() {
+        document.getElementById("mySidenav").style.width = "250px";
+        document.getElementById("sidebarbutton").style.visibility = "hidden";
+        var div = document.getElementsByClassName("bike");
+        for (var i = 0; i < div.length; i++) {
+          div[i].style.visibility = "hidden";
+        }
+        document.getElementById("mybikes").style.visibility = "hidden";
+        document.getElementById("bikeSettings").style.visibility = "hidden";
+        document.getElementById("unlockOnline").style.visibility = "hidden";
+        document.getElementById("unlockBluetooth").style.visibility = "hidden";
+        document.getElementById("bluetoothIndicator").style.visibility =
+          "hidden";
+        document.getElementById("wifiIndicator").style.visibility = "hidden";
+        document.getElementById("findme").style.visibility = "hidden";
+        var div2 = document.getElementsByClassName("bikeBriefInfo");
+        for (var i = 0; i < div2.length; i++) {
+          div2[i].style.visibility = "hidden";
+        }
+        sliderState = flkty.options.draggable;
+        toggleSlider(false);
+        navState = "visible";
+      }
+
+      function closeNav() {
+        document.getElementById("mySidenav").style.width = "0";
+        document.getElementById("sidebarbutton").style.visibility = "visible";
+        document.getElementById("findme").style.visibility = "visible";
+        var div = document.getElementsByClassName("bike");
+        for (var i = 0; i < div.length; i++) {
+          if (currentBike == -1) {
+            div[i].style.visibility = "visible";
+          } else if (currentBike == (i + 1).toString()) {
+            div[i].style.visibility = "visible";
+          }
+        }
+
+        if (closeinfoState == "visible") {
+          document.getElementById("mybikes").style.visibility = "hidden";
+          document.getElementById("bikeSettings").style.visibility = "visible";
+          document.getElementById("unlockOnline").style.visibility = "visible";
+          document.getElementById("unlockBluetooth").style.visibility =
+            "visible";
+          document.getElementById("bluetoothIndicator").style.visibility =
+            "visible";
+          document.getElementById("wifiIndicator").style.visibility = "visible";
+          var div2 = document.getElementsByClassName("bikeBriefInfo");
+          for (var i = 0; i < div2.length; i++) {
+            div2[i].style.visibility = "hidden";
+          }
+        } else {
+          document.getElementById("mybikes").style.visibility = "visible";
+          document.getElementById("bikeSettings").style.visibility = "hidden";
+          document.getElementById("unlockOnline").style.visibility = "hidden";
+          document.getElementById("unlockBluetooth").style.visibility =
+            "hidden";
+          document.getElementById("bluetoothIndicator").style.visibility =
+            "hidden";
+          document.getElementById("wifiIndicator").style.visibility = "hidden";
+          var div2 = document.getElementsByClassName("bikeBriefInfo");
+          for (var i = 0; i < div2.length; i++) {
+            div2[i].style.visibility = "visible";
+          }
+        }
+        toggleSlider(sliderState);
+        navState = "hidden";
+      }
+
+      var $carousel = $(".carousel").flickity({
+        initialIndex: 0,
+      });
+
+      var flkty = $carousel.data("flickity");
+
+      function toggleSlider(i) {
+        flkty.options.draggable = i;
+        flkty.updateDraggable();
+      }
+
+      $(".add_bike").on("click", function () {
+        Unity.call("pairbikefirst");
+      });
+
+      function manuallyAddBike() {
+        cellCount++;
+        var $cellElems = $(makeCellHtml());
+        $carousel.flickity("insert", $cellElems, cellCount - 1);
+        document.getElementsByClassName("bike")[cellCount - 1].style.height =
+          "100px";
+        document.getElementsByClassName("bike")[
+          cellCount - 1
+        ].style.backgroundImage = "url(BikeTile.png)";
+        document.getElementsByClassName("bikeBriefInfo")[
+          cellCount - 1
+        ].textContent = "Bike " + cellCount.toString();
+        document.getElementsByClassName("battInfo")[cellCount - 1].textContent =
+          "100%";
+        document.getElementsByClassName("distInfo")[cellCount - 1].textContent =
+          "0m";
+        document.getElementById("slider").style.transform =
+          "translateY(-140px)";
+        goToBike(cellCount - 1);
+        resetSliderPos();
+      }
+
+      function goToBike(index) {
+        var $cellElems = $(makeCellHtml());
+        $carousel.flickity("select", index);
+      }
+
+      function makeCellHtml() {
+        return (
+          '<div class="carousel-cell">' +
+          '<div class="bike"><button id="showinfo" onClick="whichBike(' +
+          cellCount +
+          ')" >' +
+          '</button><div class="bikeBriefInfo"></div><div class="battInfo" id="b' +
+          cellCount +
+          '" ></div><div class="distInfo" id="d' +
+          cellCount +
+          '"></div>' +
+          "</div>"
+        );
+      }
+
+      function whichBike(bikeIndex) {
+        if (closeinfoState == "hidden") {
+          Unity.call("requestbikeinfo:" + bikeIndex);
+        }
+      }
+
+      function updatePosition(lati, logi) {
+        newLat = parseFloat(lati);
+        newLog = parseFloat(logi);
+        map.flyTo([newLat, newLog], 18);
+      }
+
+      function addMarker(markerStr) {
+        var markerPos = markerStr.split(",");
+        newLat = parseFloat(markerPos[0]);
+        newLog = parseFloat(markerPos[1]);
+        var Marker = L.icon({
+          iconUrl: "Marker.png",
+          iconSize: [28, 50], // size of the icon
+          iconAnchor: [14, 50], // point of the icon which will correspond to marker's location
+        });
+        newMarker = L.marker([newLat, newLog], { icon: Marker }).addTo(
+          markerGroup
+        );
+        var radiusCircle = L.circle([newLat, newLog], 40, {
+          color: "#F19759",
+          fillopacity: 0.2,
+          dashArray: 10,
+        }).addTo(markerGroup);
+      }
+
+      function addUser() {
+        var userStr = userPos.split(",");
+        newLat = parseFloat(userStr[0]);
+        newLog = parseFloat(userStr[1]);
+        var user = L.icon({
+          iconUrl: "UserPosition.png",
+          iconSize: [35, 50], // size of the icon
+          iconAnchor: [17.5, 50], // point of the icon which will correspond to marker's location
+        });
+        L.marker([newLat, newLog], { icon: user }).addTo(markerGroup);
+        var radiusCircle = L.circle([newLat, newLog], 40, {
+          color: "#194761",
+          fillopacity: 0.2,
+          dashArray: 10,
+        }).addTo(markerGroup);
+      }
+
+      function showBikeInfo(fullString) {
+        var bikeData = fullString.split("+");
+        var bikePos = bikeData[3].split(",");
+        currentBike = bikeData[0];
+        updatePosition(bikePos[0], bikePos[1]);
+        index = parseInt(currentBike) - 1;
+        goToBike(index);
+        toggleSlider(false);
+        var div = document.getElementsByClassName("bike");
+        document.getElementById("slider").style.transform =
+          "translateY(-290px)";
+        document.getElementById("mybikes").style.visibility = "hidden";
+        for (var i = 0; i < div.length; i++) {
+          div[i].style.height = "250px";
+          if ((i + 1).toString() == bikeData[0]) {
+            div[i].style.visibility = "visible";
+            div[i].style.backgroundImage = "url(InfoTile.png)";
+            document.getElementsByClassName("battInfo")[i].style.top = "25px";
+            document.getElementsByClassName("battInfo")[i].style.left = "168px";
+            document.getElementsByClassName("distInfo")[i].style.left = "168px";
+          } else {
+            div[i].style.visibility = "hidden";
+          }
+        }
+        var div2 = document.getElementsByClassName("bikeBriefInfo");
+        for (var i = 0; i < div2.length; i++) {
+          div2[i].style.visibility = "hidden";
+        }
+        if (bikeData[1] == "1") {
+          setToUnlock();
+        } else if ((bikeData[1] = "0")) {
+          setToLock();
+        }
+        document.getElementById("bikeSettings").style.visibility = "visible";
+        document.getElementById("unlockOnline").style.visibility = "visible";
+        document.getElementById("unlockBluetooth").style.visibility = "visible";
+        document.getElementById("bluetoothIndicator").style.visibility =
+          "visible";
+        document.getElementById("wifiIndicator").style.visibility = "visible";
+        closeinfoState = "visible";
+      }
+
+      function closeInfo() {
+        toggleSlider(true);
+        currentBike = "-1";
+        document.getElementById("slider").style.transform =
+          "translateY(-140px)";
+        document.getElementById("mybikes").style.visibility = "visible";
+        var div = document.getElementsByClassName("bike");
+        for (var i = 0; i < div.length; i++) {
+          div[i].style.height = "100px";
+          div[i].style.visibility = "visible";
+          if (i != div.length - 1) {
+            div[i].style.backgroundImage = "url(BikeTile.png)";
+            document.getElementsByClassName("battInfo")[i].style.top = "59px";
+            document.getElementsByClassName("battInfo")[i].style.left = "145px";
+            document.getElementsByClassName("distInfo")[i].style.left = "198px";
+          }
+        }
+        var div2 = document.getElementsByClassName("bikeBriefInfo");
+        for (var i = 0; i < div2.length; i++) {
+          div2[i].style.visibility = "visible";
+        }
+        if (bluetoothActive == 0) {
+          document.getElementById("bluetoothIndicator").style.backgroundColor =
+            "rgb(241, 151, 89)";
+        } else if (bluetoothActive == 1) {
+          document.getElementById("bluetoothIndicator").style.backgroundColor =
+            "rgb(64, 255, 47)";
+        }
+        if (wifiActive == 0) {
+          document.getElementById("wifiIndicator").style.backgroundColor =
+            "rgb(241, 151, 89)";
+        } else if (wifiActive == 1) {
+          document.getElementById("wifiIndicator").style.backgroundColor =
+            "rgb(64, 255, 47)";
+        }
+        document.getElementById("bikeSettings").style.visibility = "hidden";
+        document.getElementById("unlockOnline").style.visibility = "hidden";
+        document.getElementById("unlockBluetooth").style.visibility = "hidden";
+        document.getElementById("bluetoothIndicator").style.visibility =
+          "hidden";
+        document.getElementById("wifiIndicator").style.visibility = "hidden";
+        closeinfoState = "hidden";
+      }
+
+      // function moveMarker(lati, logi, newLat,newLog) {
+      //   oldLat = parseFloat(lati);
+      //   newLog = parseFloat(logi);
+      //   newLat = parseFloat(lati);
+      //   newLog = parseFloat(logi);
+      //   for (let i=0; i<markerList.length;i++) {
+      //     if (i.getLatLng() == [oldLat,newLog]) {
+      //       i.setLatLng([newLat,newLog]);
+      //     }
+      //   }
+      //   L.marker([newLat, newlog]).addTo(map);
+      // }
+
+      function disableMap() {
+        map._handlers.forEach(function (handler) {
+          handler.disable();
+        });
+        map.tap.enable();
+      }
+
+      function enableMap() {
+        map._handlers.forEach(function (handler) {
+          handler.enable();
+        });
+      }
+
+      map.on("click", function () {
+        if (navState == "visible") {
+          closeNav();
+        } else if (closeinfoState == "visible") {
+          closeInfo();
+        }
+      });
+
+      function logOut() {
+        Unity.call("logout");
+      }
+
+      function wifiOff() {
+        document.getElementById("wifiIndicator").style.backgroundColor =
+          "rgb(241, 151, 89)";
+        wifiActive = 0;
+      }
+
+      function wifiOn() {
+        document.getElementById("wifiIndicator").style.backgroundColor =
+          "rgb(64, 255, 47)";
+        wifiActive = 1;
+      }
+
+      function bluetoothOff() {
+        document.getElementById("bluetoothIndicator").style.backgroundColor =
+          "rgb(241, 151, 89)";
+        bluetoothActive = 0;
+      }
+      function bluetoothOn() {
+        document.getElementById("bluetoothIndicator").style.backgroundColor =
+          "rgb(64, 255, 47)";
+        bluetoothActive = 1;
+      }
+
+      function toggleBlue(blue) {
+        if (blue == 1) {
+          document.getElementById("bluetoothIndicator").style.backgroundColor =
+            "rgb(30,144,255)";
+        } else if (blue == 0) {
+          if (bluetoothActive == 0) {
+            document.getElementById(
+              "bluetoothIndicator"
+            ).style.backgroundColor = "rgb(241, 151, 89)";
+          } else if (bluetoothActive == 1) {
+            document.getElementById(
+              "bluetoothIndicator"
+            ).style.backgroundColor = "rgb(64, 255, 47)";
+          }
+        }
+      }
+
+      function toggleOn(blue) {
+        if (blue == 1) {
+          document.getElementById("wifiIndicator").style.backgroundColor =
+            "rgb(30,144,255)";
+        } else if (blue == 0) {
+          if (wifiActive == 0) {
+            document.getElementById("wifiIndicator").style.backgroundColor =
+              "rgb(241, 151, 89)";
+          } else if (wifiActive == 1) {
+            document.getElementById("wifiIndicator").style.backgroundColor =
+              "rgb(64, 255, 47)";
+          }
+        }
+      }
+
+      function bluetoothUnlock() {
+        if (currentBike != -1) {
+          Unity.call("blueunlock" + currentBike);
+        }
+      }
+
+      function onUnlock() {
+        if (currentBike != -1) {
+          Unity.call("onunlock" + currentBike);
+        } else {
+          alert("Error");
+        }
+      }
+
+      function updateBikeData(fullStr) {
+        var ls = fullStr.split("&");
+
+        var bikeInfo = [];
+        for (var i = 0; i < ls.length - 1; i++) {
+          var lsdata = ls[i].split("+");
+          var temp = [];
+          for (var j = 0; j < lsdata.length - 1; j++) {
+            temp.push(lsdata[j]);
+          }
+          bikeInfo.push(temp);
+        }
+
+        markerGroup.clearLayers();
+        for (var i = 0; i < ls.length - 1; i++) {
+          var battid = "b" + (i + 1).toString();
+          var distid = "d" + (i + 1).toString();
+          var newbikePos = bikeInfo[i][2];
+
+          if (bikeInfo[i][3] == "1") {
+            alert("Bike " + (i + 1) + " alarm triggered!");
+          }
+          if (bikeInfo[i][4].includes("-")) {
+            document.getElementById(battid).textContent = "NA";
+          } else {
+            document.getElementById(battid).textContent = bikeInfo[i][4];
+          }
+          addMarker(newbikePos);
+          if (userPos != "NotFound") {
+            var dist = calcCrow(userPos + "," + newbikePos);
+            if (dist < 11559.6) {
+              document.getElementById(distid).textContent = dist + "km";
+            } else {
+              document.getElementById(distid).textContent = "NA";
+            }
+            addUser();
+          }
+        }
+      }
+      function updateUserPos(str) {
+        userPos = str;
+      }
+      function calcCrow(locStr) {
+        var splitStr = locStr.split(",");
+        var lat1 = parseFloat(splitStr[0]);
+        var lon1 = parseFloat(splitStr[1]);
+        var lat2 = parseFloat(splitStr[2]);
+        var lon2 = parseFloat(splitStr[3]);
+        var R = 6371; // km
+        var dLat = toRad(lat2 - lat1);
+        var dLon = toRad(lon2 - lon1);
+        var lat1 = toRad(lat1);
+        var lat2 = toRad(lat2);
+
+        var a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.sin(dLon / 2) *
+            Math.sin(dLon / 2) *
+            Math.cos(lat1) *
+            Math.cos(lat2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var d = R * c;
+        return d.toFixed(1);
+      }
+
+      // Converts numeric degrees to radians
+      function toRad(Value) {
+        return (Value * Math.PI) / 180;
+      }
+
+      function findme() {
+        var pos = userPos.split(",");
+        updatePosition(pos[0], pos[1]);
+      }
+
+      function toggleFullscreenMode() {
+        if (fullscreenMode) {
+          fullscreenMode = false;
+          document.getElementById("slider").style.top = "0px";
+          document.getElementById("mybikes").style.top = "422px";
+          document.getElementById("bikeSettings").style.top = "525px";
+          document.getElementById("unlockOnline").style.top = "550px";
+          document.getElementById("unlockBluetooth").style.top = "605px";
+          document.getElementById("bluetoothIndicator").style.top = "605px";
+          document.getElementById("wifiIndicator").style.top = "550px";
+        } else {
+          fullscreenMode = true;
+          document.getElementById("slider").style.top = "-20px";
+          document.getElementById("mybikes").style.top = "577px";
+          document.getElementById("bikeSettings").style.top = "680px";
+          document.getElementById("unlockOnline").style.top = "705px";
+          document.getElementById("unlockBluetooth").style.top = "760px";
+          document.getElementById("bluetoothIndicator").style.top = "760px";
+          document.getElementById("wifiIndicator").style.top = "705px";
+        }
+      }
+
+      function setToLock() {
+        document.getElementById("unlockOnline").textContent = "Online Lock";
+        document.getElementById("unlockBluetooth").textContent =
+          "Bluetooth Lock";
+      }
+      function setToUnlock() {
+        document.getElementById("unlockOnline").textContent = "Online Unlock";
+        document.getElementById("unlockBluetooth").textContent =
+          "Bluetooth Unlock";
+      }
+    </script>
+  </body>
+</html>
